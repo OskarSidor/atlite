@@ -180,7 +180,7 @@ def retrieve_data(esgf_params, coords, variables, chunks=None, tmpdir=None, lock
                 for f in search_results
                 if _year_in_file(f.opendap_url.split("_")[-1], years)
             ]
-            dsets.append(xr.open_mfdataset(files, chunks=chunks, concat_dim=["time"]))
+            dsets.append(xr.open_mfdataset(files, chunks=chunks, concat_dim=["time"], combine='nested'))
     ds = xr.merge(dsets)
 
     ds.attrs = {**ds.attrs, **esgf_params}
