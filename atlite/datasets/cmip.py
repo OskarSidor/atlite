@@ -43,15 +43,32 @@ dask.config.set({"array.slicing.split_large_chunks": True})
 
 
 def search_ESGF(esgf_params, url="https://esgf-data.dkrz.de/esg-search"):
-    conn = SearchConnection(url, distrib=True)
-    ctx = conn.new_context(latest=True, **esgf_params)
-    if ctx.hit_count == 0:
-        ctx = ctx.constrain(frequency=esgf_params["frequency"] + "Pt")
+    if type(esgf_params['frequency'])==str:
+        print('Only one frequency has been requested - searching for',esgf_params["variable"] ,'at a frequency of',esgf_params['frequency'])
+        conn = SearchConnection(url, distrib=True)
+        ctx = conn.new_context(latest=True, facets='data_node,source_id,variant_label,experiment_id,project,frequency',**esgf_params)   #THEA
         if ctx.hit_count == 0:
-            raise (ValueError("No results found in the ESGF_database"))
-    latest = ctx.search()[0]
-    return latest.file_context().search()
-
+            ctx = ctx.constrain(frequency=esgf_params["frequency"] + "Pt")
+            if ctx.hit_count == 0:
+                raise (ValueError("No results found in the ESGF_database - check whether they exist on https://esgf-data.dkrz.de/search/cmip6-dkrz/"))
+        latest = ctx.search(ignore_facet_check=False,**esgf_params)[0]   #THEA
+        return latest.file_context().search()
+    else:
+        frequency_options = esgf_params['frequency']
+        print('Several frequencies requested - searching for',esgf_params["variable"] ,'at a frequencies of',frequency_options)
+        for frequency_option in frequency_options:
+            esgf_params['frequency'] = frequency_option
+            conn = SearchConnection(url, distrib=True)
+            ctx = conn.new_context(latest=True, facets='data_node,source_id,variant_label,experiment_id,project,frequency',**esgf_params)   #THEA
+            if ctx.hit_count == 0:
+                ctx = ctx.constrain(frequency=esgf_params["frequency"] + "Pt")
+            if ctx.hit_count != 0:
+                print(esgf_params["variable"],'found at frequency of',esgf_params['frequency'])
+                break
+        latest = ctx.search(ignore_facet_check=False,**esgf_params)[0]   #THEA
+        esgf_params['frequency'] = frequency_options
+        return latest.file_context().search()
+    
 
 def get_data_runoff(esgf_params, cutout, **retrieval_params):
     """
