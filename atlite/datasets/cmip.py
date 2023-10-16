@@ -215,7 +215,6 @@ def retrieve_data(esgf_params, coords, variables, chunks=None, tmpdir=None, lock
 def resample_ds(esgf_params,temp_ds,dt):
     temp_ds_resampled = temp_ds.resample(time=dt).nearest()
     if xr.infer_freq(temp_ds["time"]) == "6H":
-        print('Resampling dataset for', esgf_params["variable"],'from a frequency of',xr.infer_freq(temp_ds["time"]),'to a frequency of',dt)
         if pd.Timestamp(temp_ds["time"][0].values).hour == 6:
             firstval = temp_ds_resampled.sel(time = temp_ds["time"][0])
             firstval["time"] = firstval["time"] - pd.Timedelta(dt, inplace=True)
@@ -228,9 +227,9 @@ def resample_ds(esgf_params,temp_ds,dt):
         
         else:
             temp_ds = temp_ds_resampled
-        
+        print('Dataset', esgf_params["variable"], 'resampled from a frequency of', xr.infer_freq(temp_ds["time"]), 'to a frequency of', dt)
+
     if xr.infer_freq(temp_ds["time"]) == "D":
-        print('Resampling dataset for', esgf_params["variable"],'from a frequency of',xr.infer_freq(temp_ds["time"]),'to a frequency of',dt)
         if pd.Timestamp(temp_ds["time"][0].values).hour == 12:
             firstval = temp_ds_resampled.sel(time = temp_ds["time"][0])
             firstval_00 = temp_ds_resampled.sel(time = temp_ds["time"][0])
@@ -260,7 +259,10 @@ def resample_ds(esgf_params,temp_ds,dt):
                 
         else: 
             print("Dataset does not start at 12 o'clock. The 'resample_ds' in cmip.py function needs to include this scenario.")
+        print('Dataset', esgf_params["variable"], 'resampled from a frequency of', xr.infer_freq(temp_ds["time"]), 'to a frequency of', dt)
+        
     return temp_ds_resampled
+
 
 def _rename_and_fix_coords(cutout, ds, add_lon_lat=True, add_ctime=False):
     """Rename 'longitude' and 'latitude' columns to 'x' and 'y' and fix roundings.
