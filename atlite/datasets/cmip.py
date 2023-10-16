@@ -35,6 +35,7 @@ features = {
     "influx": ["influx", "outflux"],
     "temperature": ["temperature"],
     "runoff": ["runoff"],
+    "wind_100m": ["wnd100m", "wnd_azimuth"],
 }
 
 crs = 4326
@@ -136,6 +137,26 @@ def get_data_wind(esgf_params, cutout, **retrieval_params):
     ds = _rename_and_fix_coords(cutout, ds)
     ds = ds.rename({"sfcWind": "wnd{:0d}m".format(int(ds.sfcWind.height.values))})
     ds = ds.drop_vars("height")
+    return ds
+
+
+def get_data_wind_100m(esgf_params, cutout, **retrieval_params):
+    """Function to get wind dataset at 100 m height"""
+
+    coords = cutout.coords
+    ds = retrieve_data(esgf_params, 
+                       coords, 
+                       variables=["ua100m", "va100m"], 
+                       **retrieval_params)
+    ds = _rename_and_fix_coords(cutout, ds)
+    ds["wnd100m"] = np.sqrt(ds["ua100m"] ** 2 + ds["va100m"] ** 2).assign_attrs(
+    units=ds["ua100m"].attrs["units"], long_name="100 meter wind speed")
+    # span the whole circle: 0 is north, π/2 is east, -π is south, 3π/2 is west
+    azimuth = np.arctan2(ds["ua100m"], ds["va100m"])
+    ds["wnd_azimuth"] = azimuth.where(azimuth >= 0, azimuth + 2 * np.pi)
+    ds = ds.drop_vars(["ua100m", "va100m"])
+    ds = ds.drop_vars("height")
+
     return ds
 
 
