@@ -95,7 +95,7 @@ def extrapolate_wind_speed(ds, to_height, from_height=None, from_height2=None):
 
     # Wind speed intrapolation with option to NOT use surface roughness: 
     if extrapolate_without_roughness==True: 
-        wnd_spd = ds[from_name] * (to_height / from_height)**((1 / np.log(from_height)) * np.log(ds[from_name2] / ds[from_name]))
+        wnd_spd = ds[from_name] * (to_height / from_height)**(np.log(ds[from_name2] / ds[from_name]) / np.log(from_height2 / from_height))
 
         wnd_spd.attrs.update(
             {
