@@ -1,6 +1,21 @@
-  .. SPDX-FileCopyrightText: 2016-2021 The Atlite Authors
+  .. SPDX-FileCopyrightText: 2016-2023 The Atlite Authors
 
   .. SPDX-License-Identifier: CC-BY-4.0
+
+======
+Atlite with improvements allowing to download and use CMIP6 models within Atlite
+======
+
+This branch was created for the purpose of ananlyzing effects of climate change in the end of century on wind and solar energy. For this purpose, CMIP6 climate models were used within Atlite, therefore, some improvements within Atlite had to be made. The full work is briefly described in the commit descriptions. 
+Main improvements include: 
+
+- Ability to use CMIP6 models 
+- Use of multiple temporal frequencies for climate model variables 
+- Use of multiple wind speed height levels used to calculate wind speed at hub height (based on power law)
+- Calculation of capacity factors per cell (without performing aggregation)
+
+
+The documentation below is retrevied from the main branch of Atlite. 
 
 ======
 Atlite
